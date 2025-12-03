@@ -29,8 +29,8 @@ export function CTA() {
               Ready to Secure Your Protocol?
             </h2>
             <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              Join leading protocols using VaultGuard to incentivize security research
-              and protect their users.
+              Join leading protocols using VaultGuard to incentivize security
+              research and protect their users.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/create">
@@ -59,4 +59,3 @@ export function CTA() {
     </section>
   );
 }
-

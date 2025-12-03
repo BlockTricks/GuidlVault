@@ -44,4 +44,3 @@ export const SEVERITY_COLORS = {
   [Severity.HIGH]: "bg-orange-500",
   [Severity.CRITICAL]: "bg-red-500",
 };
-

@@ -2,10 +2,23 @@
 
 import { motion } from "framer-motion";
 import { useWeb3ModalAccount } from "@reown/appkit/react";
-import { Shield, Zap, Users, TrendingUp, ArrowRight, CheckCircle2 } from "lucide-react";
+import {
+  Shield,
+  Zap,
+  Users,
+  TrendingUp,
+  ArrowRight,
+  CheckCircle2,
+} from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Navbar } from "@/components/navbar";
 import { Hero } from "@/components/hero";
 import { Features } from "@/components/features";
@@ -23,4 +36,3 @@ export default function Home() {
     </div>
   );
 }
-
