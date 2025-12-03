@@ -1,60 +1,74 @@
-# GuidlVault 🔐
+# VaultGuard 🔐
 
-> **A secure vault contract for managing guild/DAO funds** - Built with Solidity and OpenZeppelin for maximum security and flexibility.
+> **Decentralized bug bounty platform** - A protocol-friendly, researcher-friendly, and judge-based vulnerability reporting system built on Celo.
 
-GuidlVault is a comprehensive smart contract solution for managing funds in guilds, DAOs, and decentralized organizations. It features role-based access control, multi-signature withdrawal approvals, and support for both native ETH and ERC20 tokens.
+VaultGuard is a decentralized bug bounty platform where protocols create vaults with custom payout tiers, security researchers submit vulnerabilities, and trusted judges verify submissions through multisig voting. Built with Solidity for the Web3 ecosystem.
 
 ---
 
 ## ✨ Features
 
-### Core Functionality
+### Protocol-Friendly
 
-- ✅ **Multi-Token Support** - Deposit and withdraw native ETH and ERC20 tokens
-- ✅ **Role-Based Access Control** - Admin, Treasurer, and Member roles with granular permissions
-- ✅ **Multi-Signature Withdrawals** - Configurable approval threshold for secure fund management
-- ✅ **Deposit Tracking** - Track individual member contributions
-- ✅ **Withdrawal Requests** - Request-based withdrawal system with approval workflow
-- ✅ **Emergency Controls** - Pause functionality and emergency withdrawal for admins
+- ✅ **Custom Payout Tiers** - Set LOW/MEDIUM/HIGH/CRITICAL payout percentages
+- ✅ **Choose Your Judges** - Select trusted security firms, auditors, or community members
+- ✅ **Multisig Voting** - Configurable approval threshold for submissions
+- ✅ **Flexible Funding** - Deposit more funds anytime to your vault
+- ✅ **Vault Management** - Close vault and withdraw remaining funds anytime
+
+### Researcher-Friendly
+
+- ✅ **IPFS Integration** - Submit vulnerability reports via IPFS hash (privacy-first)
+- ✅ **Automatic Payout Calculation** - Based on severity and vault configuration
+- ✅ **Low Platform Fee** - Only 2.5% platform fee (vs 10-20% on centralized platforms)
+- ✅ **Trustless** - Can't be censored or denied unfairly
+- ✅ **Transparent** - All submissions and payouts visible on-chain
+
+### Judge System
+
+- ✅ **Decentralized Verification** - Multisig voting by trusted judges
+- ✅ **One Rejection = Denied** - Prevents bad reports from being approved
+- ✅ **Threshold Approvals** - Automatic payout when threshold is met
+- ✅ **Transparent Voting** - All votes recorded on-chain
 
 ### Security Features
 
-- 🔒 **Reentrancy Protection** - Using OpenZeppelin's ReentrancyGuard
-- 🔒 **Access Control** - Role-based permissions using OpenZeppelin's AccessControl
-- 🔒 **Pausable** - Ability to pause operations in case of emergencies
-- 🔒 **Safe Token Transfers** - Using SafeERC20 for secure token operations
-- 🔒 **Input Validation** - Comprehensive checks for all operations
+- 🔒 **Funds Locked** - Funds locked in contract until approved
+- 🔒 **Protocol Control** - Protocol can close vault and withdraw remaining funds
+- 🔒 **Transparent History** - All submissions visible on-chain
+- 🔒 **No Censorship** - Decentralized platform can't arbitrarily deny claims
 
 ---
 
 ## 📋 Contract Overview
 
-### Roles
+### Severity Levels
 
-- **ADMIN_ROLE**: Full control over the vault (pause, configuration, emergency withdrawals)
-- **TREASURER_ROLE**: Can create and approve withdrawal requests
-- **MEMBER_ROLE**: Can deposit funds into the vault
+- **LOW** - Minor issues (typically 1-10% of vault)
+- **MEDIUM** - Moderate issues (typically 5-25% of vault)
+- **HIGH** - Critical issues (typically 20-50% of vault)
+- **CRITICAL** - Severe vulnerabilities (typically 50-100% of vault)
 
 ### Key Functions
 
-#### Deposits
+#### Vault Management
 
-- `depositNative()` - Deposit native ETH (can also use `receive()`)
-- `depositToken(address token, uint256 amount)` - Deposit ERC20 tokens
+- `createVault(judges, requiredApprovals, payouts)` - Create a new bug bounty vault
+- `depositFunds(vaultId)` - Add more funds to an existing vault
+- `closeVault(vaultId)` - Close vault and withdraw remaining funds
 
-#### Withdrawals
+#### Submissions
 
-- `createWithdrawalRequest(...)` - Create a withdrawal request (Treasurer only)
-- `approveWithdrawalRequest(uint256 requestId)` - Approve a withdrawal request (Treasurer only)
-- `emergencyWithdraw(...)` - Direct withdrawal for emergencies (Admin only)
+- `submitVulnerability(vaultId, reportHash, severity)` - Submit a vulnerability report
+- `voteOnSubmission(submissionId, approved)` - Judge votes on a submission
+- `claimPayout(submissionId)` - Claim payout for approved submission
 
-#### Administration
+#### View Functions
 
-- `setMinDepositAmount(uint256)` - Update minimum deposit
-- `setMaxWithdrawalAmount(uint256)` - Update maximum withdrawal per transaction
-- `setRequiredApprovals(uint256)` - Update approval threshold
-- `addMember(address)` / `removeMember(address)` - Manage members
-- `pause()` / `unpause()` - Emergency pause controls
+- `getVaultJudges(vaultId)` - Get list of judges for a vault
+- `getVaultSubmissions(vaultId)` - Get all submissions for a vault
+- `getSubmissionDetails(submissionId)` - Get detailed submission information
+- `getPayoutPercentage(vaultId, severity)` - Get payout percentage for severity level
 
 ---
 
@@ -65,6 +79,7 @@ GuidlVault is a comprehensive smart contract solution for managing funds in guil
 - Node.js (v16 or higher)
 - npm or yarn
 - Hardhat
+- CELO tokens for gas fees (for deployment)
 
 ### Installation
 
@@ -85,10 +100,8 @@ npm install
 
 ```env
 PRIVATE_KEY=your_private_key_here
-SEPOLIA_RPC_URL=your_sepolia_rpc_url
-BASE_SEPOLIA_RPC_URL=https://sepolia.base.org
-ETHERSCAN_API_KEY=your_etherscan_api_key
-BASESCAN_API_KEY=your_basescan_api_key
+CELOSCAN_API_KEY=your_celoscan_api_key_here
+CELO_RPC_URL=https://forno.celo.org
 ```
 
 ### Compile
@@ -105,75 +118,96 @@ npm run test
 
 ### Deploy
 
-#### Local Network
+#### Celo Mainnet
 
 ```bash
-npm run deploy:local
+npm run deploy:celo:mainnet
 ```
 
-#### Sepolia Testnet
+#### Celo Alfajores (Testnet)
 
 ```bash
-npm run deploy:sepolia
-```
-
-#### Base Sepolia Testnet
-
-```bash
-npm run deploy:base
+npm run deploy:celo:alfajores
 ```
 
 ---
 
 ## 📖 Usage Examples
 
-### Deploying the Contract
-
-When deploying, you need to provide:
-
-- `_admin`: Address with admin privileges
-- `_treasurer`: Address with treasurer privileges
-- `_minDeposit`: Minimum deposit amount (in wei)
-- `_maxWithdrawal`: Maximum withdrawal per transaction (in wei)
-- `_requiredApprovals`: Number of approvals needed for withdrawals
-
-### Depositing Funds
+### Creating a Vault
 
 ```solidity
-// Deposit native ETH
-vault.depositNative{value: 1 ether}();
+// Example: Create a vault with 3 judges, requiring 2 approvals
+address[] memory judges = [judge1, judge2, judge3];
+uint256 requiredApprovals = 2;
+uint256[4] memory payouts = [
+    100,   // 1% for LOW
+    500,   // 5% for MEDIUM
+    2000,  // 20% for HIGH
+    5000   // 50% for CRITICAL
+];
 
-// Deposit ERC20 tokens
-vault.depositToken(tokenAddress, amount);
+vaultGuard.createVault(judges, requiredApprovals, payouts, {
+    value: ethers.parseEther("10") // 10 CELO initial deposit
+});
 ```
 
-### Creating a Withdrawal Request
+### Submitting a Vulnerability
 
 ```solidity
-vault.createWithdrawalRequest(
-    address(0), // address(0) for native ETH, or token address
-    recipientAddress,
-    amount,
-    "Reason for withdrawal"
+// Submit with IPFS hash of encrypted report
+vaultGuard.submitVulnerability(
+    vaultId,
+    "QmYourIPFSHashHere",
+    Severity.HIGH
 );
 ```
 
-### Approving a Withdrawal Request
+### Voting on Submission
 
 ```solidity
-vault.approveWithdrawalRequest(requestId);
+// Judge approves submission
+vaultGuard.voteOnSubmission(submissionId, true);
+
+// Judge rejects submission (immediate rejection)
+vaultGuard.voteOnSubmission(submissionId, false);
 ```
+
+### Claiming Payout
+
+```solidity
+// Researcher claims approved payout
+vaultGuard.claimPayout(submissionId);
+```
+
+---
+
+## 🌐 Deployment
+
+### Deployed Contract
+
+**Celo Mainnet:**
+- Contract Address: `0x7C1486c50A729DDbf5a812C490a075053522EE43`
+- Explorer: https://celoscan.io/address/0x7C1486c50A729DDbf5a812C490a075053522EE43
+- Platform Fee: 2.5% (250 basis points)
+
+### Network Information
+
+| Network        | Chain ID | Explorer                                            | RPC URL                                    |
+| -------------- | -------- | --------------------------------------------------- | ------------------------------------------ |
+| Celo Mainnet   | 42220    | [CeloScan](https://celoscan.io)                     | https://forno.celo.org                     |
+| Celo Alfajores | 44787    | [CeloScan Alfajores](https://alfajores.celoscan.io) | https://alfajores-forno.celo-testnet.org   |
 
 ---
 
 ## 🔐 Security Considerations
 
 - ⚠️ **Never commit** your `.env` file or private keys
-- ✅ All withdrawals require multi-signature approval (configurable)
-- ✅ Only authorized roles can perform sensitive operations
-- ✅ Reentrancy protection on all state-changing functions
-- ✅ Pausable for emergency situations
-- ✅ Input validation on all functions
+- ✅ All withdrawals require multisig approval
+- ✅ One judge rejection = immediate denial
+- ✅ Funds locked until approval
+- ✅ Protocol can close vault anytime
+- ✅ Transparent on-chain history
 
 ---
 
@@ -182,10 +216,12 @@ vault.approveWithdrawalRequest(requestId);
 ```
 GuidlVault/
 ├── contracts/
-│   └── GuidlVault.sol       # Main vault contract
+│   ├── VaultGuard.sol       # Main bug bounty contract
+│   └── MockERC20.sol        # Mock token for testing
 ├── scripts/
 │   └── deploy.js            # Deployment script
-├── test/                    # Test files (to be added)
+├── test/
+│   └── VaultGuard.test.js   # Test suite
 ├── hardhat.config.js        # Hardhat configuration
 ├── package.json
 └── README.md
@@ -193,12 +229,13 @@ GuidlVault/
 
 ---
 
-## 🌐 Supported Networks
+## 🎯 Hackathon Pitch Points
 
-- Ethereum Sepolia (Testnet)
-- Base Sepolia (Testnet)
-- Base Mainnet
-- Local Hardhat Network
+- **Real Problem**: HackerOne/Immunefi take huge cuts (10-20%) and can arbitrarily deny claims
+- **Composable**: Other protocols can query past submissions for researcher reputation
+- **Transparent**: All payouts/rejections visible on-chain
+- **Demo-able**: Easy to show vault creation → submission → voting → payout flow
+- **Low Fees**: Only 2.5% platform fee vs 10-20% on centralized platforms
 
 ---
 
@@ -222,25 +259,26 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🙏 Acknowledgments
 
-- **OpenZeppelin** - For secure, audited smart contract libraries
+- **Celo** - For the carbon-negative blockchain
+- **OpenZeppelin** - For secure, audited smart contract patterns
 - **Hardhat** - For the amazing development environment
-- **Base** - For the L2 network support
 
 ---
 
 ## 💡 Future Enhancements
 
 - 📊 Analytics and reporting dashboard
-- 🔄 Recurring payment support
-- 👥 Multi-vault management
+- 🔄 Recurring vault funding
+- 👥 Multi-vault management interface
 - 🏷️ Tagging and categorization
 - 📧 Event notifications
 - 🔐 Integration with governance tokens
 - ⚡ Gasless transactions (meta-transactions)
+- 📱 Mobile app integration
+- 🌍 Multi-language support
 
 ---
 
-**Built with ❤️ for the Web3 ecosystem**
+**Built with ❤️ for the Web3 security ecosystem**
 
-_Secure, transparent, and efficient fund management for decentralized organizations._ 🔐
-
+_Decentralized, transparent, and fair bug bounty platform._ 🔐

@@ -1,5 +1,6 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("@nomicfoundation/hardhat-verify");
+require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -48,7 +49,8 @@ module.exports = {
     },
   },
   etherscan: {
-    apiKey: {
+    apiKey: process.env.CELOSCAN_API_KEY || process.env.ETHERSCAN_API_KEY || "",
+    apiKeys: {
       sepolia: process.env.ETHERSCAN_API_KEY || "",
       baseSepolia: process.env.BASESCAN_API_KEY || "",
       base: process.env.BASESCAN_API_KEY || "",
