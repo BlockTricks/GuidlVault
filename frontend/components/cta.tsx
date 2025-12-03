@@ -95,7 +95,7 @@ export function CTA() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-4 border-white/90 text-white hover:bg-white/30 backdrop-blur-xl px-14 py-9 text-2xl font-black shadow-2xl glass hover:border-white"
+                    className="border-2 border-white/90 text-white hover:bg-white/30 backdrop-blur-xl px-14 py-9 text-2xl font-black shadow-2xl glass hover:border-white"
                   >
                     Explore Vaults
                   </Button>
