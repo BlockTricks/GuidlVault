@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -54,28 +54,48 @@ export function CTA() {
               Join leading protocols using VaultGuard to incentivize security research
               and protect their users.
             </motion.p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <div className="flex flex-col sm:flex-row gap-8 justify-center">
+              <motion.div
+                whileHover={{ scale: 1.1, y: -5 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 }}
+              >
                 <Link href="/create">
                   <Button
                     size="lg"
                     variant="secondary"
-                    className="bg-white text-indigo-600 hover:bg-slate-100 px-10 py-7 text-lg font-bold shadow-2xl group relative overflow-hidden"
+                    className="bg-white text-indigo-600 hover:bg-slate-50 px-14 py-9 text-2xl font-black shadow-[0_20px_40px_rgba(0,0,0,0.3)] group relative overflow-hidden border-0"
                   >
-                    <span className="relative z-10 flex items-center">
+                    <span className="relative z-10 flex items-center gap-3">
+                      <Shield className="h-7 w-7" />
                       Create Your Vault
-                      <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-2 transition-transform" />
+                      <ArrowRight className="h-7 w-7 group-hover:translate-x-3 transition-transform" />
                     </span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-100 to-purple-100 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100"
+                      initial={{ x: "-100%" }}
+                      whileHover={{ x: "100%" }}
+                      transition={{ duration: 0.5 }}
+                    />
                   </Button>
                 </Link>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <motion.div
+                whileHover={{ scale: 1.1, y: -5 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4 }}
+              >
                 <Link href="/vaults">
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-3 border-white text-white hover:bg-white/20 backdrop-blur-sm px-10 py-7 text-lg font-bold shadow-xl glass"
+                    className="border-4 border-white/90 text-white hover:bg-white/30 backdrop-blur-xl px-14 py-9 text-2xl font-black shadow-2xl glass hover:border-white"
                   >
                     Explore Vaults
                   </Button>
