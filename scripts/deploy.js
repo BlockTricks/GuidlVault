@@ -6,7 +6,10 @@ async function main() {
   // Get deployer account
   const [deployer] = await hre.ethers.getSigners();
   console.log("Deploying contracts with account:", deployer.address);
-  console.log("Account balance:", (await hre.ethers.provider.getBalance(deployer.address)).toString());
+  console.log(
+    "Account balance:",
+    (await hre.ethers.provider.getBalance(deployer.address)).toString()
+  );
 
   // Deployment parameters
   // You can modify these values as needed
@@ -35,7 +38,11 @@ async function main() {
   console.log("- Admin:", admin);
   console.log("- Treasurer:", treasurer);
   console.log("- Min Deposit:", hre.ethers.formatEther(minDeposit), "ETH");
-  console.log("- Max Withdrawal:", hre.ethers.formatEther(maxWithdrawal), "ETH");
+  console.log(
+    "- Max Withdrawal:",
+    hre.ethers.formatEther(maxWithdrawal),
+    "ETH"
+  );
   console.log("- Required Approvals:", requiredApprovals.toString());
 
   // Wait for block confirmations before verification
