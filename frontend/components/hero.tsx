@@ -6,13 +6,23 @@ import { useAppKit } from "@reown/appkit/react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Particles } from "./particles";
+import { MeshGradient } from "./mesh-gradient";
+import { FloatingShapes } from "./floating-shapes";
+import { MouseFollower } from "./mouse-follower";
+import { Confetti } from "./confetti";
+import { useState } from "react";
 
 export function Hero() {
   const { open } = useAppKit();
+  const [confettiTrigger, setConfettiTrigger] = useState(0);
 
   return (
     <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-screen flex items-center">
+      <MeshGradient />
+      <FloatingShapes />
       <Particles />
+      <MouseFollower />
+      <Confetti trigger={confettiTrigger > 0} />
 
       {/* Enhanced animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
@@ -207,6 +217,7 @@ export function Hero() {
               whileHover={{ scale: 1.08, y: -3 }}
               whileTap={{ scale: 0.95 }}
               className="relative"
+              onClick={() => setConfettiTrigger((prev) => prev + 1)}
             >
               <div className="absolute -inset-1 bg-gradient-to-r from-indigo-600 via-purple-600 via-pink-600 to-rose-600 rounded-2xl blur-lg opacity-75 animate-pulse" />
               <Button
@@ -214,7 +225,12 @@ export function Hero() {
                 className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white px-12 py-8 text-xl font-black shadow-2xl group overflow-hidden border-0"
               >
                 <span className="relative z-10 flex items-center gap-3">
-                  <Shield className="h-6 w-6" />
+                  <motion.div
+                    animate={{ rotate: [0, 360] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Shield className="h-6 w-6" />
+                  </motion.div>
                   Create Vault
                   <ArrowRight className="h-6 w-6 group-hover:translate-x-2 transition-transform" />
                 </span>
