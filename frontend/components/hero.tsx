@@ -2,12 +2,12 @@
 
 import { motion } from "framer-motion";
 import { Shield, ArrowRight, Sparkles } from "lucide-react";
-import { useWeb3Modal } from "@reown/appkit/react";
+import { useAppKit } from "@reown/appkit/react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export function Hero() {
-  const { open } = useWeb3Modal();
+  const { open } = useAppKit();
 
   return (
     <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
@@ -62,7 +62,9 @@ export function Hero() {
           className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 mb-8"
         >
           <Sparkles className="h-4 w-4" />
-          <span className="text-sm font-medium">Decentralized Bug Bounty Platform</span>
+          <span className="text-sm font-medium">
+            Decentralized Bug Bounty Platform
+          </span>
         </motion.div>
 
         <motion.h1
@@ -84,8 +86,9 @@ export function Hero() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-12 max-w-3xl mx-auto"
         >
-          The first decentralized bug bounty platform on Celo. Protocols create vaults,
-          researchers submit vulnerabilities, and trusted judges verify submissions.
+          The first decentralized bug bounty platform on Celo. Protocols create
+          vaults, researchers submit vulnerabilities, and trusted judges verify
+          submissions.
           <span className="block mt-2 text-lg font-semibold text-indigo-600 dark:text-indigo-400">
             Only 2.5% platform fee • No censorship • Fully transparent
           </span>
@@ -138,7 +141,9 @@ export function Hero() {
               <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
                 {stat.value}
               </div>
-              <div className="text-slate-600 dark:text-slate-400 mt-1">{stat.label}</div>
+              <div className="text-slate-600 dark:text-slate-400 mt-1">
+                {stat.label}
+              </div>
             </motion.div>
           ))}
         </motion.div>
@@ -146,4 +151,3 @@ export function Hero() {
     </section>
   );
 }
-

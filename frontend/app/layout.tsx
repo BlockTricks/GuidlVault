@@ -6,7 +6,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "VaultGuard - Decentralized Bug Bounty Platform",
-  description: "Protocol-friendly, researcher-friendly bug bounty platform on Celo",
+  description:
+    "Protocol-friendly, researcher-friendly bug bounty platform on Celo",
 };
 
 export default function RootLayout({
@@ -25,4 +26,3 @@ export default function RootLayout({
     </html>
   );
 }
-

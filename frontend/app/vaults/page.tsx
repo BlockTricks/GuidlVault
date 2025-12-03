@@ -2,30 +2,39 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { useWeb3ModalAccount, useWeb3ModalProvider } from "@reown/appkit/react";
+import { useEthersProvider } from "@reown/appkit-adapter-ethers";
 import { ethers } from "ethers";
 import { Shield, DollarSign, Users, TrendingUp, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Navbar } from "@/components/navbar";
 import { VAULT_GUARD_ADDRESS, VAULT_GUARD_ABI } from "@/lib/contract";
 import Link from "next/link";
 
 export default function Vaults() {
-  const { walletProvider } = useWeb3ModalProvider();
+  const provider = useEthersProvider();
   const [vaults, setVaults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadVaults();
-  }, [walletProvider]);
+  }, [provider]);
 
   const loadVaults = async () => {
-    if (!walletProvider) return;
+    if (!provider) return;
     try {
-      const provider = new ethers.BrowserProvider(walletProvider);
-      const contract = new ethers.Contract(VAULT_GUARD_ADDRESS, VAULT_GUARD_ABI, provider);
+      const contract = new ethers.Contract(
+        VAULT_GUARD_ADDRESS,
+        VAULT_GUARD_ABI,
+        provider
+      );
       const count = await contract.vaultCount();
       const vaultList = [];
       for (let i = 0; i < count; i++) {
@@ -93,7 +102,8 @@ export default function Vaults() {
                         </Badge>
                       </div>
                       <CardDescription>
-                        {vault.protocol.slice(0, 6)}...{vault.protocol.slice(-4)}
+                        {vault.protocol.slice(0, 6)}...
+                        {vault.protocol.slice(-4)}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -120,7 +130,9 @@ export default function Vaults() {
                           <Users className="h-4 w-4" />
                           <span className="text-sm">Approvals</span>
                         </div>
-                        <span className="font-bold">{vault.requiredApprovals.toString()}</span>
+                        <span className="font-bold">
+                          {vault.requiredApprovals.toString()}
+                        </span>
                       </div>
                       <Link href={`/vaults/${vault.id}`}>
                         <Button className="w-full" variant="outline">
@@ -139,4 +151,3 @@ export default function Vaults() {
     </div>
   );
 }
-

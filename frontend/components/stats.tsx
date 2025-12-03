@@ -4,10 +4,30 @@ import { motion } from "framer-motion";
 import { TrendingUp, DollarSign, Users, Shield } from "lucide-react";
 
 const stats = [
-  { icon: Shield, label: "Active Vaults", value: "12", change: "+3 this month" },
-  { icon: DollarSign, label: "Total Bounties", value: "$50K+", change: "Locked in contracts" },
-  { icon: Users, label: "Researchers", value: "200+", change: "Active community" },
-  { icon: TrendingUp, label: "Success Rate", value: "85%", change: "Approved submissions" },
+  {
+    icon: Shield,
+    label: "Active Vaults",
+    value: "12",
+    change: "+3 this month",
+  },
+  {
+    icon: DollarSign,
+    label: "Total Bounties",
+    value: "$50K+",
+    change: "Locked in contracts",
+  },
+  {
+    icon: Users,
+    label: "Researchers",
+    value: "200+",
+    change: "Active community",
+  },
+  {
+    icon: TrendingUp,
+    label: "Success Rate",
+    value: "85%",
+    change: "Approved submissions",
+  },
 ];
 
 export function Stats() {
@@ -42,4 +62,3 @@ export function Stats() {
     </section>
   );
 }
-

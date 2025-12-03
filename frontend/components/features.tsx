@@ -2,43 +2,55 @@
 
 import { motion } from "framer-motion";
 import { Shield, Zap, Users, TrendingUp, Lock, Eye } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const features = [
   {
     icon: Shield,
     title: "Protocol-Friendly",
-    description: "Create vaults with custom payout tiers. Choose your own judges and set approval thresholds.",
+    description:
+      "Create vaults with custom payout tiers. Choose your own judges and set approval thresholds.",
     color: "from-blue-500 to-cyan-500",
   },
   {
     icon: Zap,
     title: "Researcher-Friendly",
-    description: "Only 2.5% platform fee. Submit via IPFS for privacy. Trustless and censorship-resistant.",
+    description:
+      "Only 2.5% platform fee. Submit via IPFS for privacy. Trustless and censorship-resistant.",
     color: "from-purple-500 to-pink-500",
   },
   {
     icon: Users,
     title: "Decentralized Judges",
-    description: "Multisig voting by trusted security firms, auditors, or community members.",
+    description:
+      "Multisig voting by trusted security firms, auditors, or community members.",
     color: "from-indigo-500 to-purple-500",
   },
   {
     icon: Lock,
     title: "Funds Locked",
-    description: "All funds are locked in smart contracts until submissions are approved.",
+    description:
+      "All funds are locked in smart contracts until submissions are approved.",
     color: "from-green-500 to-emerald-500",
   },
   {
     icon: Eye,
     title: "Fully Transparent",
-    description: "All submissions, votes, and payouts are recorded on-chain for complete transparency.",
+    description:
+      "All submissions, votes, and payouts are recorded on-chain for complete transparency.",
     color: "from-orange-500 to-red-500",
   },
   {
     icon: TrendingUp,
     title: "Composable",
-    description: "Other protocols can query past submissions to build researcher reputation systems.",
+    description:
+      "Other protocols can query past submissions to build researcher reputation systems.",
     color: "from-pink-500 to-rose-500",
   },
 ];
@@ -58,7 +70,8 @@ export function Features() {
             Why Choose VaultGuard?
           </h2>
           <p className="text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-            Built for protocols, researchers, and the entire Web3 security ecosystem
+            Built for protocols, researchers, and the entire Web3 security
+            ecosystem
           </p>
         </motion.div>
 
@@ -94,4 +107,3 @@ export function Features() {
     </section>
   );
 }
-

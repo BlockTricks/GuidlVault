@@ -4,32 +4,37 @@ import { createAppKit } from "@reown/appkit/react";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { mainnet, celo, celoAlfajores } from "@reown/appkit/networks";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { WagmiProvider } from "wagmi";
 
 // Get project ID from environment
-const projectId = process.env.NEXT_PUBLIC_REOWN_ID || "1db88bda17adf26df9ab7799871788c4";
+const projectId =
+  process.env.NEXT_PUBLIC_REOWN_ID || "1db88bda17adf26df9ab7799871788c4";
 
-// Create a metadata object - this is optional
-const metadata = {
-  name: "VaultGuard",
-  description: "Decentralized Bug Bounty Platform",
-  url: "https://vaultguard.xyz", // origin must match your domain & subdomain
-  icons: ["https://vaultguard.xyz/logo.png"],
-};
-
-// Create Wagmi Adapter
+// Create Wagmi config
 const wagmiAdapter = new WagmiAdapter({
   networks: [celo, celoAlfajores, mainnet],
   projectId,
+  ssr: true,
 });
+
+const wagmiConfig = wagmiAdapter.wagmiConfig!;
 
 // Create modal
 createAppKit({
   adapters: [wagmiAdapter],
   networks: [celo, celoAlfajores, mainnet],
   projectId,
-  metadata,
+  metadata: {
+    name: "VaultGuard",
+    description: "Decentralized Bug Bounty Platform",
+    url:
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "https://vaultguard.xyz",
+    icons: [],
+  },
   features: {
-    analytics: true, // Optional - defaults to your Cloud configuration
+    analytics: true,
   },
   themeMode: "light",
 });
@@ -38,9 +43,8 @@ export const queryClient = new QueryClient();
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </WagmiProvider>
   );
 }
-

@@ -2,11 +2,18 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useWeb3ModalAccount, useWeb3ModalProvider } from "@reown/appkit/react";
+import { useAccount } from "wagmi";
+import { useEthersProvider, useEthersSigner } from "@reown/appkit-adapter-ethers";
 import { ethers } from "ethers";
 import { Shield, Plus, Users, Percent } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Navbar } from "@/components/navbar";
@@ -14,8 +21,9 @@ import { VAULT_GUARD_ADDRESS, VAULT_GUARD_ABI } from "@/lib/contract";
 import { toast } from "sonner";
 
 export default function CreateVault() {
-  const { address, isConnected } = useWeb3ModalAccount();
-  const { walletProvider } = useWeb3ModalProvider();
+  const { address, isConnected } = useAccount();
+  const provider = useEthersProvider();
+  const signer = useEthersSigner();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     deposit: "",
@@ -38,7 +46,7 @@ export default function CreateVault() {
   };
 
   const createVault = async () => {
-    if (!isConnected || !walletProvider) {
+    if (!isConnected || !signer) {
       toast.error("Please connect your wallet");
       return;
     }
@@ -56,9 +64,15 @@ export default function CreateVault() {
 
     try {
       setLoading(true);
-      const provider = new ethers.BrowserProvider(walletProvider);
-      const signer = await provider.getSigner();
-      const contract = new ethers.Contract(VAULT_GUARD_ADDRESS, VAULT_GUARD_ABI, signer);
+      if (!signer) {
+        toast.error("Signer not available");
+        return;
+      }
+      const contract = new ethers.Contract(
+        VAULT_GUARD_ADDRESS,
+        VAULT_GUARD_ABI,
+        signer
+      );
 
       const payouts = [
         parseInt(formData.payouts.low) * 100, // Convert to basis points
@@ -120,7 +134,9 @@ export default function CreateVault() {
                   type="number"
                   placeholder="10"
                   value={formData.deposit}
-                  onChange={(e) => setFormData({ ...formData, deposit: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, deposit: e.target.value })
+                  }
                 />
               </div>
 
@@ -150,7 +166,10 @@ export default function CreateVault() {
                   type="number"
                   value={formData.requiredApprovals}
                   onChange={(e) =>
-                    setFormData({ ...formData, requiredApprovals: e.target.value })
+                    setFormData({
+                      ...formData,
+                      requiredApprovals: e.target.value,
+                    })
                   }
                 />
               </div>
@@ -166,11 +185,16 @@ export default function CreateVault() {
                     <Label>{label}</Label>
                     <Input
                       type="number"
-                      value={formData.payouts[key as keyof typeof formData.payouts]}
+                      value={
+                        formData.payouts[key as keyof typeof formData.payouts]
+                      }
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          payouts: { ...formData.payouts, [key]: e.target.value },
+                          payouts: {
+                            ...formData.payouts,
+                            [key]: e.target.value,
+                          },
                         })
                       }
                     />
@@ -193,4 +217,3 @@ export default function CreateVault() {
     </div>
   );
 }
-

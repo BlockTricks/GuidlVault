@@ -2,15 +2,15 @@
 
 import { motion } from "framer-motion";
 import { Shield, Menu, X } from "lucide-react";
-import { useWeb3Modal } from "@reown/appkit/react";
-import { useWeb3ModalAccount } from "@reown/appkit/react";
+import { useAppKit } from "@reown/appkit/react";
+import { useAccount, useDisconnect } from "wagmi";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import Link from "next/link";
 
 export function Navbar() {
-  const { open } = useWeb3Modal();
-  const { address, isConnected } = useWeb3ModalAccount();
+  const { open } = useAppKit();
+  const { address, isConnected } = useAccount();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -35,13 +35,22 @@ export function Navbar() {
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/vaults" className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <Link
+              href="/vaults"
+              className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+            >
               Vaults
             </Link>
-            <Link href="/create" className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <Link
+              href="/create"
+              className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+            >
               Create Vault
             </Link>
-            <Link href="/submit" className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <Link
+              href="/submit"
+              className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+            >
               Submit
             </Link>
             <Button
@@ -72,13 +81,22 @@ export function Navbar() {
           className="md:hidden border-t border-slate-200 dark:border-slate-800"
         >
           <div className="px-4 py-4 space-y-4">
-            <Link href="/vaults" className="block text-slate-600 dark:text-slate-300">
+            <Link
+              href="/vaults"
+              className="block text-slate-600 dark:text-slate-300"
+            >
               Vaults
             </Link>
-            <Link href="/create" className="block text-slate-600 dark:text-slate-300">
+            <Link
+              href="/create"
+              className="block text-slate-600 dark:text-slate-300"
+            >
               Create Vault
             </Link>
-            <Link href="/submit" className="block text-slate-600 dark:text-slate-300">
+            <Link
+              href="/submit"
+              className="block text-slate-600 dark:text-slate-300"
+            >
               Submit
             </Link>
             <Button onClick={() => open()} className="w-full">
@@ -90,4 +108,3 @@ export function Navbar() {
     </motion.nav>
   );
 }
-
