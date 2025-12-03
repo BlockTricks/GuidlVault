@@ -4,6 +4,7 @@ import { createAppKit } from "@reown/appkit/react";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { mainnet, celo, celoAlfajores } from "@reown/appkit/networks";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { WagmiProvider } from "wagmi";
 
 // Get project ID from environment
 const projectId =
@@ -15,6 +16,8 @@ const wagmiAdapter = new WagmiAdapter({
   projectId,
   ssr: true,
 });
+
+const wagmiConfig = wagmiAdapter.wagmiConfig!;
 
 // Create modal
 createAppKit({
@@ -40,6 +43,8 @@ export const queryClient = new QueryClient();
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </WagmiProvider>
   );
 }

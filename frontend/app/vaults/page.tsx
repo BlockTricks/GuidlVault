@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { useWeb3ModalAccount, useWeb3ModalProvider } from "@reown/appkit/react";
+import { useEthersProvider } from "@reown/appkit-adapter-ethers";
 import { ethers } from "ethers";
 import { Shield, DollarSign, Users, TrendingUp, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,18 +19,17 @@ import { VAULT_GUARD_ADDRESS, VAULT_GUARD_ABI } from "@/lib/contract";
 import Link from "next/link";
 
 export default function Vaults() {
-  const { walletProvider } = useWeb3ModalProvider();
+  const provider = useEthersProvider();
   const [vaults, setVaults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadVaults();
-  }, [walletProvider]);
+  }, [provider]);
 
   const loadVaults = async () => {
-    if (!walletProvider) return;
+    if (!provider) return;
     try {
-      const provider = new ethers.BrowserProvider(walletProvider);
       const contract = new ethers.Contract(
         VAULT_GUARD_ADDRESS,
         VAULT_GUARD_ABI,

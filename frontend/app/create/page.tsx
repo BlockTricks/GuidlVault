@@ -46,7 +46,7 @@ export default function CreateVault() {
   };
 
   const createVault = async () => {
-    if (!isConnected || !walletProvider) {
+    if (!isConnected || !signer) {
       toast.error("Please connect your wallet");
       return;
     }
@@ -64,8 +64,10 @@ export default function CreateVault() {
 
     try {
       setLoading(true);
-      const provider = new ethers.BrowserProvider(walletProvider);
-      const signer = await provider.getSigner();
+      if (!signer) {
+        toast.error("Signer not available");
+        return;
+      }
       const contract = new ethers.Contract(
         VAULT_GUARD_ADDRESS,
         VAULT_GUARD_ABI,

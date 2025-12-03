@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useWeb3ModalAccount } from "@reown/appkit/react";
 import {
   Shield,
   Zap,
