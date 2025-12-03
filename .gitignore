@@ -10,6 +10,12 @@ typechain-types
 cache
 artifacts
 
+# Next.js
+.next
+out
+dist
+build
+
 # IDE
 .vscode
 .idea
