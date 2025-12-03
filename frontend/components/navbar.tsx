@@ -15,21 +15,23 @@ export function Navbar() {
 
   return (
     <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-200 dark:border-slate-800"
+      className="fixed top-0 w-full z-50 glass backdrop-blur-xl border-b border-white/20 dark:border-slate-800/50 shadow-lg"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-3 group">
             <motion.div
-              whileHover={{ rotate: 360 }}
+              whileHover={{ rotate: 360, scale: 1.1 }}
               transition={{ duration: 0.5 }}
+              className="relative"
             >
-              <Shield className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
+              <div className="absolute inset-0 bg-indigo-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
+              <Shield className="h-9 w-9 text-indigo-600 dark:text-indigo-400 relative z-10 drop-shadow-lg" />
             </motion.div>
-            <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="text-2xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent group-hover:scale-105 transition-transform">
               VaultGuard
             </span>
           </Link>

@@ -79,23 +79,28 @@ export function Features() {
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ y: -8 }}
             >
-              <Card className="h-full hover:shadow-xl transition-shadow border-2 hover:border-indigo-300 dark:hover:border-indigo-700">
-                <CardHeader>
+              <Card className="h-full hover:shadow-2xl transition-all duration-300 border-2 hover:border-indigo-300 dark:hover:border-indigo-700 glass backdrop-blur-md overflow-hidden group relative">
+                <div className={`absolute inset-0 bg-gradient-to-r ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                <CardHeader className="relative z-10">
                   <motion.div
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    className={`w-12 h-12 rounded-lg bg-gradient-to-r ${feature.color} flex items-center justify-center mb-4`}
+                    whileHover={{ scale: 1.15, rotate: [0, -10, 10, -10, 0] }}
+                    transition={{ duration: 0.5 }}
+                    className={`w-14 h-14 rounded-xl bg-gradient-to-r ${feature.color} flex items-center justify-center mb-4 shadow-lg`}
                   >
-                    <feature.icon className="h-6 w-6 text-white" />
+                    <feature.icon className="h-7 w-7 text-white" />
                   </motion.div>
-                  <CardTitle className="text-xl">{feature.title}</CardTitle>
+                  <CardTitle className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
+                    {feature.title}
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base">
+                <CardContent className="relative z-10">
+                  <CardDescription className="text-base leading-relaxed">
                     {feature.description}
                   </CardDescription>
                 </CardContent>

@@ -10,15 +10,16 @@ export function Hero() {
   const { open } = useAppKit();
 
   return (
-    <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Animated background elements */}
+    <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-screen flex items-center">
+      {/* Enhanced animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          className="absolute top-20 left-10 w-72 h-72 bg-indigo-300 dark:bg-indigo-900 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-xl opacity-30 animate-float"
+          className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-40 animate-float"
           animate={{
-            scale: [1, 1.2, 1],
-            x: [0, 100, 0],
-            y: [0, -50, 0],
+            scale: [1, 1.3, 1],
+            x: [0, 150, 0],
+            y: [0, -80, 0],
+            rotate: [0, 180, 360],
           }}
           transition={{
             duration: 20,
@@ -27,11 +28,12 @@ export function Hero() {
           }}
         />
         <motion.div
-          className="absolute top-40 right-10 w-72 h-72 bg-purple-300 dark:bg-purple-900 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-xl opacity-30 animate-float"
+          className="absolute top-40 right-10 w-96 h-96 bg-gradient-to-br from-pink-400 to-rose-500 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-40 animate-float"
           animate={{
             scale: [1.2, 1, 1.2],
-            x: [0, -100, 0],
-            y: [0, 50, 0],
+            x: [0, -150, 0],
+            y: [0, 80, 0],
+            rotate: [360, 180, 0],
           }}
           transition={{
             duration: 25,
@@ -40,11 +42,12 @@ export function Hero() {
           }}
         />
         <motion.div
-          className="absolute -bottom-32 left-1/2 w-72 h-72 bg-pink-300 dark:bg-pink-900 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-xl opacity-30 animate-float"
+          className="absolute -bottom-32 left-1/2 w-96 h-96 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-40 animate-float"
           animate={{
-            scale: [1, 1.3, 1],
-            x: [0, 50, 0],
-            y: [0, -30, 0],
+            scale: [1, 1.4, 1],
+            x: [0, 100, 0],
+            y: [0, -50, 0],
+            rotate: [0, -180, -360],
           }}
           transition={{
             duration: 30,
@@ -52,6 +55,28 @@ export function Hero() {
             ease: "easeInOut",
           }}
         />
+        {/* Additional smaller floating elements */}
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-32 h-32 bg-gradient-to-br from-indigo-200 to-purple-300 rounded-full opacity-20 blur-2xl"
+            animate={{
+              x: [0, Math.random() * 200 - 100],
+              y: [0, Math.random() * 200 - 100],
+              scale: [1, 1.5, 1],
+            }}
+            transition={{
+              duration: 15 + i * 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: i * 0.5,
+            }}
+            style={{
+              left: `${10 + i * 15}%`,
+              top: `${20 + (i % 3) * 30}%`,
+            }}
+          />
+        ))}
       </div>
 
       <div className="relative max-w-7xl mx-auto text-center">
@@ -71,13 +96,19 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient"
+          className="text-6xl md:text-8xl font-extrabold mb-6 leading-tight"
         >
-          Secure Your Protocol
-          <br />
-          <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Reward Researchers
+          <span className="block bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient drop-shadow-2xl">
+            Secure Your Protocol
           </span>
+          <motion.span
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="block bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 bg-clip-text text-transparent mt-2"
+          >
+            Reward Researchers
+          </motion.span>
         </motion.h1>
 
         <motion.p
@@ -98,26 +129,39 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          className="flex flex-col sm:flex-row gap-6 justify-center items-center"
         >
           <Link href="/create">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white px-10 py-7 text-lg font-bold shadow-2xl animate-pulse-glow group relative overflow-hidden"
+              >
+                <span className="relative z-10 flex items-center">
+                  Create Vault
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-2 transition-transform" />
+                </span>
+                <div className="absolute inset-0 animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity" />
+              </Button>
+            </motion.div>
+          </Link>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
             <Button
               size="lg"
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-6 text-lg group"
+              variant="outline"
+              onClick={() => open()}
+              className="px-10 py-7 text-lg font-semibold border-2 border-indigo-300 dark:border-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 backdrop-blur-sm glass transition-all"
             >
-              Create Vault
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              <Shield className="mr-2 h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+              Connect Wallet
             </Button>
-          </Link>
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => open()}
-            className="px-8 py-6 text-lg border-2"
-          >
-            <Shield className="mr-2 h-5 w-5" />
-            Connect Wallet
-          </Button>
+          </motion.div>
         </motion.div>
 
         <motion.div
