@@ -23,26 +23,3 @@ export const VAULT_GUARD_ABI = [
   "event PayoutSent(uint256 indexed submissionId, address indexed researcher, uint256 amount)",
 ] as const;
 
-export enum Severity {
-  LOW = 0,
-  MEDIUM = 1,
-  HIGH = 2,
-  CRITICAL = 3,
-}
-
-export enum SubmissionStatus {
-  PENDING = 0,
-  APPROVED = 1,
-  REJECTED = 2,
-  PAID = 3,
-}
-
-export const SEVERITY_LABELS = ["Low", "Medium", "High", "Critical"];
-export const SEVERITY_COLORS = {
-  [Severity.LOW]: "bg-blue-500",
-  [Severity.MEDIUM]: "bg-yellow-500",
-  [Severity.HIGH]: "bg-orange-500",
-  [Severity.CRITICAL]: "bg-red-500",
-};
-
-
