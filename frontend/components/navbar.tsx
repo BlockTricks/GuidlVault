@@ -46,6 +46,13 @@ export function Navbar() {
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
+              href="/dashboard"
+              className="text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all font-medium hover:scale-105 relative group"
+            >
+              Dashboard
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300" />
+            </Link>
+            <Link
               href="/create"
               className="text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all font-medium hover:scale-105 relative group"
             >
@@ -99,6 +106,12 @@ export function Navbar() {
               className="block text-slate-600 dark:text-slate-300"
             >
               Vaults
+            </Link>
+            <Link
+              href="/dashboard"
+              className="block text-slate-600 dark:text-slate-300"
+            >
+              Dashboard
             </Link>
             <Link
               href="/create"
