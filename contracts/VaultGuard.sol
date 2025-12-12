@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 /**
  * @title VaultGuard
@@ -11,6 +12,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
  */
 contract VaultGuard is ReentrancyGuard {
     using SafeERC20 for IERC20;
+    using ECDSA for bytes32;
     
     // Enums
     enum Severity { LOW, MEDIUM, HIGH, CRITICAL }
@@ -37,6 +39,12 @@ contract VaultGuard is ReentrancyGuard {
         uint256 approvalCount;
         uint256 payoutAmount;
         uint256 platformFeeAmount;
+        // commit-reveal
+        bytes32 commitHash;
+        bool revealed;
+        uint256 revealDeadline;
+        uint256 votingDeadline;
+        mapping(address => bool) voteApproved;
         mapping(address => bool) hasVoted;
     }
     
@@ -51,6 +59,7 @@ contract VaultGuard is ReentrancyGuard {
     mapping(uint256 => uint256[]) public vaultSubmissions; // vaultId => submissionIds[]
     struct VaultAsset { address token; bool isNative; }
     mapping(uint256 => VaultAsset) public vaultAssets;
+    address public reputationSBT;
     
     // Events
     event VaultCreated(uint256 indexed vaultId, address indexed protocol, uint256 deposit);
@@ -88,6 +97,16 @@ contract VaultGuard is ReentrancyGuard {
     constructor(address _platformWallet) {
         require(_platformWallet != address(0), "Invalid platform wallet");
         platformWallet = _platformWallet;
+    }
+
+    function setReputationSBT(address _sbt) external {
+        require(msg.sender == platformWallet, "Not platform");
+        reputationSBT = _sbt;
+    }
+
+    interface IReputationSBT {
+        function mintResearcher(address to) external;
+        function mintJudge(address to) external;
     }
     
     /**
@@ -206,11 +225,50 @@ contract VaultGuard is ReentrancyGuard {
         submission.severity = _severity;
         submission.timestamp = block.timestamp;
         submission.status = SubmissionStatus.PENDING;
+        submission.votingDeadline = block.timestamp + 3 days;
         
         vaultSubmissions[_vaultId].push(submissionId);
         
         emit SubmissionCreated(submissionId, _vaultId, msg.sender);
         return submissionId;
+    }
+
+    event SubmissionCommitted(uint256 indexed submissionId, uint256 indexed vaultId, address indexed researcher);
+    event SubmissionRevealed(uint256 indexed submissionId);
+    event SubmissionExpired(uint256 indexed submissionId);
+
+    function commitSubmission(uint256 _vaultId, bytes32 _commit) external vaultActive(_vaultId) returns (uint256) {
+        require(_commit != bytes32(0), "Commit required");
+        uint256 submissionId = submissionCount++;
+        Submission storage submission = submissions[submissionId];
+        submission.vaultId = _vaultId;
+        submission.researcher = msg.sender;
+        submission.commitHash = _commit;
+        submission.timestamp = block.timestamp;
+        submission.status = SubmissionStatus.PENDING;
+        submission.revealDeadline = block.timestamp + 2 days;
+        vaultSubmissions[_vaultId].push(submissionId);
+        emit SubmissionCommitted(submissionId, _vaultId, msg.sender);
+        return submissionId;
+    }
+
+    function revealSubmission(
+        uint256 _submissionId,
+        string memory _reportHash,
+        Severity _severity,
+        bytes32 _salt
+    ) external {
+        Submission storage submission = submissions[_submissionId];
+        require(submission.researcher == msg.sender, "Not the researcher");
+        require(!submission.revealed, "Already revealed");
+        require(submission.revealDeadline >= block.timestamp, "Reveal expired");
+        bytes32 computed = keccak256(abi.encode(submission.vaultId, submission.researcher, _reportHash, _severity, _salt));
+        require(computed == submission.commitHash, "Invalid reveal");
+        submission.reportHash = _reportHash;
+        submission.severity = _severity;
+        submission.revealed = true;
+        submission.votingDeadline = block.timestamp + 3 days;
+        emit SubmissionRevealed(_submissionId);
     }
     
     /**
@@ -224,6 +282,7 @@ contract VaultGuard is ReentrancyGuard {
     ) external {
         Submission storage submission = submissions[_submissionId];
         require(submission.status == SubmissionStatus.PENDING, "Not pending");
+        require(submission.votingDeadline == 0 || block.timestamp <= submission.votingDeadline, "Voting closed");
         
         uint256 vaultId = submission.vaultId;
         require(vaults[vaultId].active, "Vault not active");
@@ -240,6 +299,7 @@ contract VaultGuard is ReentrancyGuard {
         require(!submission.hasVoted[msg.sender], "Already voted");
         
         submission.hasVoted[msg.sender] = true;
+        submission.voteApproved[msg.sender] = _approved;
         
         if(_approved) {
             submission.approvalCount++;
@@ -254,6 +314,14 @@ contract VaultGuard is ReentrancyGuard {
             submission.status = SubmissionStatus.REJECTED;
             emit SubmissionRejected(_submissionId);
         }
+    }
+
+    function finalizeSubmission(uint256 _submissionId) external {
+        Submission storage submission = submissions[_submissionId];
+        require(submission.status == SubmissionStatus.PENDING, "Not pending");
+        require(submission.votingDeadline != 0 && block.timestamp > submission.votingDeadline, "Not expired");
+        submission.status = SubmissionStatus.REJECTED;
+        emit SubmissionExpired(_submissionId);
     }
     
     /**
@@ -278,6 +346,15 @@ contract VaultGuard is ReentrancyGuard {
         vault.remainingFunds -= baseAmount;
         
         emit SubmissionApproved(_submissionId, researcherPayout);
+
+        if (reputationSBT != address(0)) {
+            address[] memory js = vault.judges;
+            for (uint i = 0; i < js.length; i++) {
+                if (submission.voteApproved[js[i]]) {
+                    IReputationSBT(reputationSBT).mintJudge(js[i]);
+                }
+            }
+        }
     }
     
     /**
@@ -307,6 +384,10 @@ contract VaultGuard is ReentrancyGuard {
         }
         
         emit PayoutSent(_submissionId, msg.sender, researcherPayout);
+
+        if (reputationSBT != address(0)) {
+            IReputationSBT(reputationSBT).mintResearcher(msg.sender);
+        }
     }
     
     /**
