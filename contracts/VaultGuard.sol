@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title VaultGuard
  * @notice Decentralized bug bounty platform where protocols deposit funds
  * and security researchers submit vulnerabilities for review and automatic payout
  */
-contract VaultGuard {
+contract VaultGuard is ReentrancyGuard {
+    using SafeERC20 for IERC20;
     
     // Enums
     enum Severity { LOW, MEDIUM, HIGH, CRITICAL }
@@ -32,6 +36,7 @@ contract VaultGuard {
         SubmissionStatus status;
         uint256 approvalCount;
         uint256 payoutAmount;
+        uint256 platformFeeAmount;
         mapping(address => bool) hasVoted;
     }
     
@@ -44,6 +49,8 @@ contract VaultGuard {
     mapping(uint256 => BountyVault) public vaults;
     mapping(uint256 => Submission) public submissions;
     mapping(uint256 => uint256[]) public vaultSubmissions; // vaultId => submissionIds[]
+    struct VaultAsset { address token; bool isNative; }
+    mapping(uint256 => VaultAsset) public vaultAssets;
     
     // Events
     event VaultCreated(uint256 indexed vaultId, address indexed protocol, uint256 deposit);
@@ -115,7 +122,43 @@ contract VaultGuard {
         vault.payoutPercentages[Severity.HIGH] = _payouts[2];
         vault.payoutPercentages[Severity.CRITICAL] = _payouts[3];
         
+        vaultAssets[vaultId] = VaultAsset(address(0), true);
         emit VaultCreated(vaultId, msg.sender, msg.value);
+        return vaultId;
+    }
+
+    function createERC20Vault(
+        address _token,
+        address[] memory _judges,
+        uint256 _requiredApprovals,
+        uint256[4] memory _payouts,
+        uint256 _initialAmount
+    ) external returns (uint256) {
+        require(_token != address(0), "Invalid token");
+        require(_initialAmount > 0, "Must deposit funds");
+        require(_judges.length >= _requiredApprovals, "Invalid approval threshold");
+        require(_requiredApprovals > 0, "Need at least 1 approval");
+        require(_payouts[0] <= 1000 && _payouts[1] <= 2500 && _payouts[2] <= 5000 && _payouts[3] <= 10000, "Invalid payout percentages");
+
+        uint256 vaultId = vaultCount++;
+        BountyVault storage vault = vaults[vaultId];
+
+        vault.protocol = msg.sender;
+        vault.totalDeposit = _initialAmount;
+        vault.remainingFunds = _initialAmount;
+        vault.active = true;
+        vault.judges = _judges;
+        vault.requiredApprovals = _requiredApprovals;
+
+        vault.payoutPercentages[Severity.LOW] = _payouts[0];
+        vault.payoutPercentages[Severity.MEDIUM] = _payouts[1];
+        vault.payoutPercentages[Severity.HIGH] = _payouts[2];
+        vault.payoutPercentages[Severity.CRITICAL] = _payouts[3];
+
+        vaultAssets[vaultId] = VaultAsset(_token, false);
+        IERC20(_token).safeTransferFrom(msg.sender, address(this), _initialAmount);
+
+        emit VaultCreated(vaultId, msg.sender, _initialAmount);
         return vaultId;
     }
     
@@ -129,6 +172,16 @@ contract VaultGuard {
         vaults[_vaultId].remainingFunds += msg.value;
         
         emit FundsDeposited(_vaultId, msg.value);
+    }
+
+    function depositFundsERC20(uint256 _vaultId, uint256 _amount) external onlyProtocol(_vaultId) vaultActive(_vaultId) {
+        require(_amount > 0, "Must send funds");
+        VaultAsset memory asset = vaultAssets[_vaultId];
+        require(!asset.isNative && asset.token != address(0), "Invalid vault asset");
+        IERC20(asset.token).safeTransferFrom(msg.sender, address(this), _amount);
+        vaults[_vaultId].totalDeposit += _amount;
+        vaults[_vaultId].remainingFunds += _amount;
+        emit FundsDeposited(_vaultId, _amount);
     }
     
     /**
@@ -212,7 +265,7 @@ contract VaultGuard {
         BountyVault storage vault = vaults[vaultId];
         
         // Calculate payout based on severity
-        uint256 baseAmount = (vault.totalDeposit * vault.payoutPercentages[submission.severity]) / 10000;
+        uint256 baseAmount = (vault.remainingFunds * vault.payoutPercentages[submission.severity]) / 10000;
         uint256 platformCut = (baseAmount * platformFee) / 10000;
         uint256 researcherPayout = baseAmount - platformCut;
         
@@ -220,6 +273,7 @@ contract VaultGuard {
         
         submission.status = SubmissionStatus.APPROVED;
         submission.payoutAmount = researcherPayout;
+        submission.platformFeeAmount = platformCut;
         
         vault.remainingFunds -= baseAmount;
         
@@ -229,7 +283,7 @@ contract VaultGuard {
     /**
      * @notice Claim payout for approved submission
      */
-    function claimPayout(uint256 _submissionId) external {
+    function claimPayout(uint256 _submissionId) external nonReentrant {
         Submission storage submission = submissions[_submissionId];
         require(submission.researcher == msg.sender, "Not the researcher");
         require(submission.status == SubmissionStatus.APPROVED, "Not approved");
@@ -239,17 +293,19 @@ contract VaultGuard {
         uint256 researcherPayout = submission.payoutAmount;
         uint256 vaultId = submission.vaultId;
         BountyVault storage vault = vaults[vaultId];
-        
-        // Recalculate platform cut from the base amount
-        uint256 baseAmount = (vault.totalDeposit * vault.payoutPercentages[submission.severity]) / 10000;
-        uint256 platformCut = (baseAmount * platformFee) / 10000;
+        VaultAsset memory asset = vaultAssets[vaultId];
+        uint256 platformCut = submission.platformFeeAmount;
         
         // Transfer funds
-        (bool success1, ) = payable(msg.sender).call{value: researcherPayout}("");
-        require(success1, "Transfer to researcher failed");
-        
-        (bool success2, ) = payable(platformWallet).call{value: platformCut}("");
-        require(success2, "Transfer to platform failed");
+        if (asset.isNative) {
+            (bool success1, ) = payable(msg.sender).call{value: researcherPayout}("");
+            require(success1, "Transfer to researcher failed");
+            (bool success2, ) = payable(platformWallet).call{value: platformCut}("");
+            require(success2, "Transfer to platform failed");
+        } else {
+            IERC20(asset.token).safeTransfer(msg.sender, researcherPayout);
+            IERC20(asset.token).safeTransfer(platformWallet, platformCut);
+        }
         
         emit PayoutSent(_submissionId, msg.sender, researcherPayout);
     }
@@ -257,17 +313,21 @@ contract VaultGuard {
     /**
      * @notice Close vault and withdraw remaining funds
      */
-    function closeVault(uint256 _vaultId) external onlyProtocol(_vaultId) {
+    function closeVault(uint256 _vaultId) external onlyProtocol(_vaultId) nonReentrant {
         BountyVault storage vault = vaults[_vaultId];
         require(vault.active, "Already closed");
         
         vault.active = false;
         uint256 remaining = vault.remainingFunds;
         vault.remainingFunds = 0;
-        
+        VaultAsset memory asset = vaultAssets[_vaultId];
         if(remaining > 0) {
-            (bool success, ) = payable(msg.sender).call{value: remaining}("");
-            require(success, "Transfer failed");
+            if (asset.isNative) {
+                (bool success, ) = payable(msg.sender).call{value: remaining}("");
+                require(success, "Transfer failed");
+            } else {
+                IERC20(asset.token).safeTransfer(msg.sender, remaining);
+            }
         }
         
         emit VaultClosed(_vaultId, remaining);
@@ -307,4 +367,3 @@ contract VaultGuard {
         );
     }
 }
-
