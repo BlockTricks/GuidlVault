@@ -4,6 +4,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 interface IReputationSBT {
     function mintResearcher(address to) external;
@@ -15,7 +16,7 @@ interface IReputationSBT {
  * @notice Decentralized bug bounty platform where protocols deposit funds
  * and security researchers submit vulnerabilities for review and automatic payout
  */
-contract VaultGuard is ReentrancyGuard {
+contract VaultGuard is ReentrancyGuard, EIP712 {
     using SafeERC20 for IERC20;
     using ECDSA for bytes32;
     
@@ -32,6 +33,7 @@ contract VaultGuard is ReentrancyGuard {
         address[] judges;
         uint256 requiredApprovals;
         mapping(Severity => uint256) payoutPercentages; // percentage of totalDeposit
+        mapping(Severity => uint256) minPayouts;
     }
     
     struct Submission {
@@ -65,6 +67,7 @@ contract VaultGuard is ReentrancyGuard {
     struct VaultAsset { address token; bool isNative; }
     mapping(uint256 => VaultAsset) public vaultAssets;
     address public reputationSBT;
+    bytes32 private constant VOTE_TYPEHASH = keccak256("Vote(uint256 submissionId,address judge,bool approved)");
     
     // Events
     event VaultCreated(uint256 indexed vaultId, address indexed protocol, uint256 deposit);
@@ -99,7 +102,7 @@ contract VaultGuard is ReentrancyGuard {
         _;
     }
     
-    constructor(address _platformWallet) {
+    constructor(address _platformWallet) EIP712("VaultGuard", "1") {
         require(_platformWallet != address(0), "Invalid platform wallet");
         platformWallet = _platformWallet;
     }
@@ -317,6 +320,43 @@ contract VaultGuard is ReentrancyGuard {
         }
     }
 
+    function _hashVote(uint256 _submissionId, address _judge) internal view returns (bytes32) {
+        bytes32 structHash = keccak256(abi.encode(VOTE_TYPEHASH, _submissionId, _judge, true));
+        return _hashTypedDataV4(structHash);
+    }
+
+    function submitAggregatedVotes(
+        uint256 _submissionId,
+        address[] calldata _judges,
+        bytes[] calldata _signatures
+    ) external {
+        require(_judges.length == _signatures.length, "Length mismatch");
+        Submission storage submission = submissions[_submissionId];
+        require(submission.status == SubmissionStatus.PENDING, "Not pending");
+        require(submission.votingDeadline == 0 || block.timestamp <= submission.votingDeadline, "Voting closed");
+        uint256 vaultId = submission.vaultId;
+        require(vaults[vaultId].active, "Vault not active");
+        for (uint i = 0; i < _judges.length; i++) {
+            address judge = _judges[i];
+            bool isJudge = false;
+            for(uint j = 0; j < vaults[vaultId].judges.length; j++) {
+                if(vaults[vaultId].judges[j] == judge) { isJudge = true; break; }
+            }
+            require(isJudge, "Not a judge");
+            require(!submission.hasVoted[judge], "Already voted");
+            bytes32 digest = _hashVote(_submissionId, judge);
+            address signer = ECDSA.recover(digest, _signatures[i]);
+            require(signer == judge, "Bad signature");
+            submission.hasVoted[judge] = true;
+            submission.voteApproved[judge] = true;
+            submission.approvalCount++;
+            emit SubmissionVoted(_submissionId, judge, true);
+        }
+        if(submission.approvalCount >= vaults[vaultId].requiredApprovals && submission.status == SubmissionStatus.PENDING) {
+            _approveSubmission(_submissionId);
+        }
+    }
+
     function finalizeSubmission(uint256 _submissionId) external {
         Submission storage submission = submissions[_submissionId];
         require(submission.status == SubmissionStatus.PENDING, "Not pending");
@@ -335,6 +375,11 @@ contract VaultGuard is ReentrancyGuard {
         
         // Calculate payout based on severity
         uint256 baseAmount = (vault.remainingFunds * vault.payoutPercentages[submission.severity]) / 10000;
+        uint256 minFloor = vault.minPayouts[submission.severity];
+        if (baseAmount < minFloor) {
+            require(vault.remainingFunds >= minFloor, "Insufficient vault funds");
+            baseAmount = minFloor;
+        }
         uint256 platformCut = (baseAmount * platformFee) / 10000;
         uint256 researcherPayout = baseAmount - platformCut;
         
@@ -412,6 +457,14 @@ contract VaultGuard is ReentrancyGuard {
         }
         
         emit VaultClosed(_vaultId, remaining);
+    }
+
+    function setMinPayouts(uint256 _vaultId, uint256[4] memory _mins) external onlyProtocol(_vaultId) {
+        BountyVault storage vault = vaults[_vaultId];
+        vault.minPayouts[Severity.LOW] = _mins[0];
+        vault.minPayouts[Severity.MEDIUM] = _mins[1];
+        vault.minPayouts[Severity.HIGH] = _mins[2];
+        vault.minPayouts[Severity.CRITICAL] = _mins[3];
     }
     
     // View functions
