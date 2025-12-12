@@ -50,16 +50,15 @@ contract ReputationSBT is ERC721, Ownable {
         revert("SBT: non-transferable");
     }
 
-    function transferFrom(address, address, uint256) public pure override {
-        revert("SBT: non-transferable");
-    }
-
-    function safeTransferFrom(address, address, uint256) public pure override {
-        revert("SBT: non-transferable");
-    }
-
-    function safeTransferFrom(address, address, uint256, bytes memory) public pure override {
-        revert("SBT: non-transferable");
+    function _update(address to, uint256 tokenId, address auth)
+        internal
+        override
+        returns (address)
+    {
+        address from = _ownerOf(tokenId);
+        if (from != address(0) && to != address(0)) {
+            revert("SBT: non-transferable");
+        }
+        return super._update(to, tokenId, auth);
     }
 }
-
