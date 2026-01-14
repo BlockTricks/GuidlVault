@@ -3,6 +3,7 @@ import { GeistSans } from "geist/font/sans";
 import { Providers } from "@/lib/wagmi";
 import { Toaster } from "@/components/ui/sonner";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { AiAssistant } from "@/components/ai-assistant";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function RootLayout({
         <ErrorBoundary>
           <Providers>
             {children}
+            <AiAssistant />
             <Toaster />
           </Providers>
         </ErrorBoundary>
