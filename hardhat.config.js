@@ -49,14 +49,7 @@ module.exports = {
     },
   },
   etherscan: {
-    apiKey: process.env.CELOSCAN_API_KEY || process.env.ETHERSCAN_API_KEY || "",
-    apiKeys: {
-      sepolia: process.env.ETHERSCAN_API_KEY || "",
-      baseSepolia: process.env.BASESCAN_API_KEY || "",
-      base: process.env.BASESCAN_API_KEY || "",
-      celoAlfajores: process.env.CELOSCAN_API_KEY || "",
-      celo: process.env.CELOSCAN_API_KEY || "",
-    },
+    apiKey: process.env.BASESCAN_API_KEY || process.env.CELOSCAN_API_KEY || process.env.ETHERSCAN_API_KEY || "",
     customChains: [
       {
         network: "baseSepolia",
