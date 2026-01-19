@@ -1,5 +1,5 @@
 // VaultGuard Contract ABI and Address
-export const VAULT_GUARD_ADDRESS = "0x374083Da98352b7895E8CB2faD74c068962d17d7";
+export const VAULT_GUARD_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 export const VAULT_GUARD_ABI = [
   "function createVault(address[] memory _judges, uint256 _requiredApprovals, uint256[4] memory _payouts) external payable returns (uint256)",
